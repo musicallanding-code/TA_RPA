@@ -1,0 +1,139 @@
+// Self-hosted Calendly — data model (per SPEC.md §3.4)
+//
+// MVP uses SQLite (no external DB needed). To move to PostgreSQL later, change
+// `provider` to "postgresql" and set DATABASE_URL accordingly. Note: SQLite does
+// not support Prisma enums, so enum-like fields are modelled as String with the
+// allowed values documented inline.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+/// 面試關卡類型 (a bookable interview stage)
+model EventType {
+  id              String   @id @default(cuid())
+  slug            String   @unique
+  title           String
+  jiraKey         String? // e.g. VACANCY-690 / JIRA690
+  durationMin     Int      @default(60)
+  locationType    String   @default("meet") // phone | meet | onsite
+  instructionsMd  String? // Markdown shown on the public booking page
+  bufferBeforeMin Int      @default(0)
+  bufferAfterMin  Int      @default(0)
+  minNoticeHours  Int      @default(12)
+  maxPerDay       Int? // null = unlimited
+  bookingWindowDays Int    @default(30)
+  assignment      String   @default("single") // single | collective | round_robin
+  active          Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  interviewers EventTypeInterviewer[]
+  bookings     Booking[]
+}
+
+/// 面試官
+model Interviewer {
+  id              String   @id @default(cuid())
+  name            String
+  email           String   @unique
+  googleAccountId String? // links to a GoogleCredential (M2)
+  createdAt       DateTime @default(now())
+
+  eventTypes    EventTypeInterviewer[]
+  availability  Availability[]
+  dateOverrides DateOverride[]
+  bookings      Booking[]
+}
+
+/// EventType <-> Interviewer (多對多)
+model EventTypeInterviewer {
+  eventTypeId   String
+  interviewerId String
+
+  eventType   EventType   @relation(fields: [eventTypeId], references: [id], onDelete: Cascade)
+  interviewer Interviewer @relation(fields: [interviewerId], references: [id], onDelete: Cascade)
+
+  @@id([eventTypeId, interviewerId])
+}
+
+/// 每週可面試時段. startTime/endTime stored as "HH:mm" in COMPANY_TZ.
+model Availability {
+  id            String @id @default(cuid())
+  interviewerId String
+  dayOfWeek     Int // 0 = Sunday ... 6 = Saturday (Luxon: convert from weekday)
+  startTime     String // "HH:mm"
+  endTime       String // "HH:mm"
+
+  interviewer Interviewer @relation(fields: [interviewerId], references: [id], onDelete: Cascade)
+
+  @@index([interviewerId, dayOfWeek])
+}
+
+/// 特定日覆寫 (block a day off, or set a different window for one date)
+model DateOverride {
+  id            String  @id @default(cuid())
+  interviewerId String
+  date          String // "YYYY-MM-DD" in COMPANY_TZ
+  available     Boolean @default(false)
+  startTime     String? // "HH:mm" when available + custom window
+  endTime       String?
+
+  interviewer Interviewer @relation(fields: [interviewerId], references: [id], onDelete: Cascade)
+
+  @@unique([interviewerId, date])
+}
+
+/// 預約
+model Booking {
+  id              String   @id @default(cuid())
+  eventTypeId     String
+  interviewerId   String
+  candidateName   String
+  candidateEmail  String
+  candidatePhone  String?
+  startUtc        DateTime
+  endUtc          DateTime
+  status          String   @default("confirmed") // confirmed | cancelled | rescheduled
+  googleEventId   String?
+  rescheduleToken String   @unique @default(cuid())
+  cancelToken     String   @unique @default(cuid())
+  jiraKey         String?
+  createdAt       DateTime @default(now())
+
+  eventType   EventType   @relation(fields: [eventTypeId], references: [id])
+  interviewer Interviewer @relation(fields: [interviewerId], references: [id])
+
+  // Prevents double-booking the same interviewer for the same start (SPEC §3.7).
+  @@unique([interviewerId, startUtc])
+  @@index([eventTypeId, startUtc])
+}
+
+/// Google OAuth credentials (M2). refreshToken stored encrypted at rest.
+model GoogleCredential {
+  id           String    @id @default(cuid())
+  ownerId      String    @unique
+  accessToken  String?
+  refreshToken String? // encrypted
+  expiry       DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+/// 稽核 log (誰、何時、改了什麼)
+model AuditLog {
+  id     String   @id @default(cuid())
+  actor  String
+  action String
+  entity String
+  before String? // JSON snapshot
+  after  String? // JSON snapshot
+  ts     DateTime @default(now())
+
+  @@index([entity, ts])
+}
