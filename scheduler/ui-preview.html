@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>M1 UI 預覽 · 自建 Calendly</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: { extend: { colors: { brand: { DEFAULT: "#0069ff", dark: "#0050c9" } } } },
+  };
+</script>
+<style>
+  body { font-family: ui-sans-serif, system-ui, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif; background:#f8fafc; }
+  .label { background:#111827; color:#fff; font-size:12px; letter-spacing:.05em; }
+</style>
+</head>
+<body class="text-gray-900">
+
+<div class="mx-auto max-w-5xl px-4 py-8">
+  <div class="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-800">
+    這是 <strong>M1 介面的靜態視覺預覽</strong>（用相同的 Tailwind class 與種子資料重現實際元件）。
+    真實互動版請在本機跑 <code>cd scheduler &amp;&amp; npm run setup &amp;&amp; npm run dev</code> 後開啟對應網址。
+  </div>
+</div>
+
+<!-- ===================== 公開預約頁 ===================== -->
+<div class="mx-auto max-w-5xl px-4">
+  <span class="label inline-block rounded px-2 py-1">公開預約頁  ·  /senior-recruiter-jira690</span>
+</div>
+<main class="mx-auto max-w-5xl px-4 py-4">
+  <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm md:grid md:grid-cols-[minmax(0,360px)_1fr]">
+    <!-- left column -->
+    <aside class="border-b border-gray-200 p-8 md:border-b-0 md:border-r">
+      <p class="text-sm text-gray-500">CMoney 招募</p>
+      <h1 class="mt-1 text-xl font-bold text-gray-900">職能：資深人才招募專員 (JIRA690)</h1>
+      <ul class="mt-5 space-y-2 text-sm text-gray-600">
+        <li class="flex items-center gap-2"><span>🕒</span>60 分鐘</li>
+        <li class="flex items-center gap-2"><span>📞</span>電話</li>
+        <li class="flex items-center gap-2"><span>👤</span>Interviewer：黃琬心</li>
+      </ul>
+      <div class="mt-6 whitespace-pre-wrap border-t border-gray-100 pt-5 text-sm leading-relaxed text-gray-700">預約面試請填中文姓名
+Email 請與 104 履歷一致
+此關卡會致電進行
+Interviewer：黃琬心</div>
+    </aside>
+
+    <!-- right column: booking panel -->
+    <section class="p-8">
+      <div class="md:grid md:grid-cols-[1fr_minmax(0,260px)] md:gap-8">
+        <!-- calendar -->
+        <div>
+          <h2 class="mb-3 text-lg font-semibold text-gray-900">選擇日期與時間</h2>
+          <div class="w-full">
+            <div class="mb-3 flex items-center justify-between">
+              <button class="rounded p-1 text-gray-300">‹</button>
+              <span class="text-sm font-semibold text-gray-900">2026 年 6 月</span>
+              <button class="rounded p-1 text-gray-500 hover:bg-gray-100">›</button>
+            </div>
+            <div class="grid grid-cols-7 gap-1 text-center text-xs text-gray-400">
+              <div class="py-1">日</div><div class="py-1">一</div><div class="py-1">二</div><div class="py-1">三</div><div class="py-1">四</div><div class="py-1">五</div><div class="py-1">六</div>
+            </div>
+            <div id="cal" class="mt-1 grid grid-cols-7 gap-1"></div>
+            <p class="mt-2 text-center text-xs text-gray-400">藍色＝有可預約時段；灰色＝不可選</p>
+          </div>
+          <label class="mt-4 block">
+            <span class="block text-xs font-medium text-gray-500">時區</span>
+            <select class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm">
+              <option>Taipei Time (Asia/Taipei)</option><option>UTC</option>
+            </select>
+          </label>
+        </div>
+        <!-- slots -->
+        <div class="mt-6 md:mt-0">
+          <p class="mb-3 text-sm font-medium text-gray-900">6 月 8 日 (週一)</p>
+          <div class="space-y-4">
+            <div>
+              <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">上午</p>
+              <div class="grid grid-cols-2 gap-2">
+                <button class="rounded-md border border-brand bg-brand px-3 py-2 text-sm font-medium text-white">10:00</button>
+                <button class="rounded-md border border-brand/40 px-3 py-2 text-sm font-medium text-brand hover:border-brand">10:30</button>
+                <button class="rounded-md border border-brand/40 px-3 py-2 text-sm font-medium text-brand hover:border-brand">11:00</button>
+              </div>
+            </div>
+          </div>
+          <div class="mt-5 rounded-md bg-gray-50 p-3 text-sm text-gray-700">
+            已選擇 10:00（Asia/Taipei）。
+            <p class="mt-1 text-xs text-gray-500">M1 僅展示時段選取；填表與建立預約於 M3 完成。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<!-- ===================== 管理後台 ===================== -->
+<div class="mx-auto max-w-5xl px-4 pt-10">
+  <span class="label inline-block rounded px-2 py-1">管理後台  ·  /admin</span>
+</div>
+<main class="mx-auto max-w-5xl px-6 py-4">
+  <header class="flex items-center justify-between">
+    <h1 class="text-2xl font-bold text-gray-900">管理後台</h1>
+    <nav class="flex items-center gap-4 text-sm">
+      <a class="text-brand underline">面試官與特定日設定</a>
+      <a class="text-brand underline">← 回首頁</a>
+    </nav>
+  </header>
+  <p class="mt-1 text-sm text-amber-700">M1：尚未啟用 Google 網域登入保護，請勿對外公開。</p>
+
+  <section class="mt-8">
+    <h2 class="text-lg font-semibold text-gray-900">現有 Event Types</h2>
+    <div class="mt-4 overflow-x-auto">
+      <table class="w-full border-collapse text-sm">
+        <thead>
+          <tr class="border-b border-gray-200 text-left text-gray-500">
+            <th class="py-2">標題</th><th class="py-2">slug</th><th class="py-2">時長</th><th class="py-2">面試官</th><th class="py-2">預約數</th><th class="py-2">狀態</th><th class="py-2">操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="border-b border-gray-100 align-top">
+            <td class="py-2 font-medium text-gray-900">職能：資深人才招募專員 (JIRA690)</td>
+            <td class="py-2"><a class="text-brand underline">senior-recruiter-jira690</a></td>
+            <td class="py-2 text-gray-600">60m</td>
+            <td class="py-2 text-gray-600">黃琬心</td>
+            <td class="py-2 text-gray-600">0</td>
+            <td class="py-2 text-green-700">啟用中</td>
+            <td class="py-2">
+              <div class="flex items-center gap-3">
+                <a class="text-brand hover:underline">編輯</a>
+                <button class="text-gray-600 hover:underline">停用</button>
+                <button class="text-red-600 hover:underline">刪除</button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="mt-10">
+    <h2 class="text-lg font-semibold text-gray-900">建立新的 Event Type</h2>
+    <div class="mt-4 space-y-5 rounded-lg border border-gray-200 bg-white p-6">
+      <div class="grid gap-4 sm:grid-cols-2">
+        <label class="block text-sm"><span class="font-medium text-gray-700">slug *</span>
+          <input value="senior-recruiter-jira690" class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm" />
+          <span class="mt-1 block text-xs text-gray-400">英數小寫與連字號；輸入標題會自動帶入。</span>
+        </label>
+        <label class="block text-sm"><span class="font-medium text-gray-700">標題 *</span>
+          <input value="職能：資深人才招募專員" class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm" /></label>
+        <label class="block text-sm"><span class="font-medium text-gray-700">JIRA 編號</span>
+          <input value="JIRA690" class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm" /></label>
+        <label class="block text-sm"><span class="font-medium text-gray-700">時長 (分鐘)</span>
+          <input value="60" class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm" /></label>
+      </div>
+      <fieldset class="rounded-md border border-gray-200 p-4">
+        <legend class="px-1 text-sm font-medium text-gray-700">面試官與每週可面試時段</legend>
+        <div class="mt-2 space-y-2">
+          <div class="flex flex-wrap items-center gap-2">
+            <select class="rounded-md border border-gray-300 px-2 py-1 text-sm"><option>週一</option></select>
+            <input type="time" value="10:00" class="rounded-md border border-gray-300 px-2 py-1 text-sm" />
+            <span class="text-gray-400">–</span>
+            <input type="time" value="12:00" class="rounded-md border border-gray-300 px-2 py-1 text-sm" />
+            <button class="text-xs text-red-600">刪除</button>
+          </div>
+          <button class="text-sm text-brand">+ 新增時段</button>
+        </div>
+      </fieldset>
+      <button class="rounded-md bg-brand px-5 py-2 text-sm font-medium text-white hover:bg-brand-dark">建立 Event Type</button>
+    </div>
+  </section>
+</main>
+
+<!-- ===================== 面試官與特定日設定 ===================== -->
+<div class="mx-auto max-w-5xl px-4 pt-10">
+  <span class="label inline-block rounded px-2 py-1">面試官與特定日設定 (DateOverride)  ·  /admin/interviewers</span>
+</div>
+<main class="mx-auto max-w-3xl px-6 py-4">
+  <header class="flex items-center justify-between">
+    <h1 class="text-2xl font-bold text-gray-900">面試官與特定日設定</h1>
+    <a class="text-sm text-brand underline">← 回管理後台</a>
+  </header>
+  <p class="mt-1 text-sm text-gray-500">每週可面試時段於建立 Event Type 時設定；此頁管理「特定日覆寫」（休假 / 臨時調整）。</p>
+  <div class="mt-6 space-y-6">
+    <section class="rounded-lg border border-gray-200 bg-white p-6">
+      <div class="flex items-baseline justify-between">
+        <h2 class="text-lg font-semibold text-gray-900">黃琬心</h2>
+        <span class="text-sm text-gray-500">wanxin.huang@cmoney.com.tw</span>
+      </div>
+      <p class="mt-2 text-xs text-gray-400">指派關卡：職能：資深人才招募專員</p>
+      <div class="mt-3">
+        <p class="text-xs font-semibold uppercase tracking-wide text-gray-400">每週可面試時段</p>
+        <ul class="mt-1 flex flex-wrap gap-2 text-sm text-gray-700">
+          <li class="rounded bg-gray-100 px-2 py-0.5">週一 10:00–12:00</li>
+          <li class="rounded bg-gray-100 px-2 py-0.5">週三 14:00–17:00</li>
+          <li class="rounded bg-gray-100 px-2 py-0.5">週五 10:00–12:00</li>
+        </ul>
+      </div>
+      <div class="mt-3">
+        <p class="text-xs font-semibold uppercase tracking-wide text-gray-400">特定日覆寫 (DateOverride)</p>
+        <ul class="mt-2 space-y-1 text-sm">
+          <li class="flex items-center gap-2"><span class="font-medium text-gray-800">2026-06-08</span><span class="text-red-600">休假（封鎖整天）</span><button class="text-xs text-gray-400 hover:text-red-600">刪除</button></li>
+          <li class="flex items-center gap-2"><span class="font-medium text-gray-800">2026-06-12</span><span class="text-green-700">可面試 14:00–15:00</span><button class="text-xs text-gray-400 hover:text-red-600">刪除</button></li>
+        </ul>
+        <form class="mt-3 flex flex-wrap items-center gap-2">
+          <input type="date" class="rounded-md border border-gray-300 px-2 py-1 text-sm" />
+          <label class="flex items-center gap-1 text-sm text-gray-700"><input type="checkbox" />可面試</label>
+          <button class="rounded-md bg-brand px-3 py-1 text-sm text-white hover:bg-brand-dark">新增休假日</button>
+        </form>
+        <p class="mt-1 text-xs text-gray-400">不勾「可面試」= 封鎖整天；勾選但留空時間 = 沿用每週時段。</p>
+      </div>
+    </section>
+  </div>
+</main>
+
+<div class="mx-auto max-w-5xl px-4 py-10 text-center text-xs text-gray-400">
+  自建 Calendly · M1 視覺預覽 · 種子資料：職能：資深人才招募專員 (JIRA690) / 黃琬心
+</div>
+
+<script>
+  // Render the June 2026 month grid (June 1 2026 = Monday).
+  const available = new Set([5,8,10,12,15,17,19,22,24,26,29]);
+  const selected = 8;
+  const leading = 1; // Sun-first grid, June 1 is Monday -> one leading blank
+  const cal = document.getElementById("cal");
+  for (let i = 0; i < leading; i++) cal.appendChild(document.createElement("div"));
+  for (let d = 1; d <= 30; d++) {
+    const b = document.createElement("button");
+    b.textContent = d;
+    b.className = "aspect-square rounded-full text-sm transition ";
+    if (d === selected) b.className += "bg-brand font-semibold text-white";
+    else if (available.has(d)) b.className += "font-medium text-brand hover:bg-brand/10";
+    else b.className += "text-gray-300";
+    cal.appendChild(b);
+  }
+</script>
+</body>
+</html>
