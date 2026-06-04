@@ -46,3 +46,45 @@ export const createEventTypeSchema = z.object({
 });
 
 export type CreateEventTypeInput = z.infer<typeof createEventTypeSchema>;
+
+// PATCH /api/admin/event-types/:slug — only the scalar Event Type fields.
+// Interviewer / availability management lives on the interviewers admin page.
+export const updateEventTypeSchema = z
+  .object({
+    title: z.string().min(1),
+    jiraKey: z.string().nullable(),
+    durationMin: z.number().int().positive(),
+    locationType: z.enum(["phone", "meet", "onsite"]),
+    instructionsMd: z.string().nullable(),
+    bufferBeforeMin: z.number().int().min(0),
+    bufferAfterMin: z.number().int().min(0),
+    minNoticeHours: z.number().int().min(0),
+    maxPerDay: z.number().int().positive().nullable(),
+    bookingWindowDays: z.number().int().positive(),
+    assignment: z.enum(["single", "collective", "round_robin"]),
+    active: z.boolean(),
+  })
+  .partial();
+
+export type UpdateEventTypeInput = z.infer<typeof updateEventTypeSchema>;
+
+// POST /api/admin/interviewers/:id/date-overrides — set a specific-day override.
+export const dateOverrideSchema = z
+  .object({
+    date: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/, "日期需為 YYYY-MM-DD 格式"),
+    available: z.boolean(),
+    startTime: hhmm.optional().nullable(),
+    endTime: hhmm.optional().nullable(),
+  })
+  .refine(
+    (o) =>
+      !o.available ||
+      !o.startTime ||
+      !o.endTime ||
+      o.startTime < o.endTime,
+    { message: "startTime 必須早於 endTime" }
+  );
+
+export type DateOverrideInput = z.infer<typeof dateOverrideSchema>;
