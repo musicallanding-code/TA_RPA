@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { slugify } from "@/lib/slug";
 
 const DAY_LABELS = ["日", "一", "二", "三", "四", "五", "六"];
 
@@ -14,6 +15,7 @@ interface AvailabilityRow {
 export default function EventTypeForm() {
   const router = useRouter();
   const [slug, setSlug] = useState("");
+  const [slugTouched, setSlugTouched] = useState(false);
   const [title, setTitle] = useState("");
   const [jiraKey, setJiraKey] = useState("");
   const [durationMin, setDurationMin] = useState(60);
@@ -106,17 +108,27 @@ export default function EventTypeForm() {
           <span className="font-medium text-gray-700">slug *</span>
           <input
             value={slug}
-            onChange={(e) => setSlug(e.target.value)}
+            onChange={(e) => {
+              setSlugTouched(true);
+              setSlug(e.target.value);
+            }}
             placeholder="senior-recruiter-jira690"
             required
             className={inputCls}
           />
+          <span className="mt-1 block text-xs text-gray-400">
+            英數小寫與連字號；輸入標題會自動帶入（英數標題才有效）。
+          </span>
         </label>
         <label className="block text-sm">
           <span className="font-medium text-gray-700">標題 *</span>
           <input
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(e) => {
+              const next = e.target.value;
+              setTitle(next);
+              if (!slugTouched) setSlug(slugify(next));
+            }}
             placeholder="職能：資深人才招募專員"
             required
             className={inputCls}
