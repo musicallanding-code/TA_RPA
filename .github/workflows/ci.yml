@@ -1,0 +1,41 @@
+name: CI
+
+# 每次推送或對 PR 更新時，自動跑型別檢查、測試與建置。
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  scheduler:
+    name: scheduler (typecheck · test · build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: scheduler
+    env:
+      # Prisma 需要這個變數才能 generate / build；CI 用 SQLite 檔即可。
+      DATABASE_URL: "file:./ci.db"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: scheduler/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
