@@ -1,12 +1,19 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import { googleEnabled } from "@/lib/google";
 import DateOverrideEditor from "./DateOverrideEditor";
+import GoogleConnect from "./GoogleConnect";
 
 export const dynamic = "force-dynamic";
 
 const DAY_LABELS = ["日", "一", "二", "三", "四", "五", "六"];
 
-export default async function InterviewersPage() {
+export default async function InterviewersPage({
+  searchParams,
+}: {
+  searchParams: { google_connected?: string; google_error?: string };
+}) {
+  const gEnabled = googleEnabled();
   const interviewers = await prisma.interviewer.findMany({
     orderBy: { name: "asc" },
     include: {
@@ -26,8 +33,26 @@ export default async function InterviewersPage() {
       </header>
       <p className="mt-1 text-sm text-gray-500">
         每週可面試時段於建立 Event Type 時設定；此頁管理「特定日覆寫」（休假 /
-        臨時調整）。
+        臨時調整）與 Google 行事曆連接。
       </p>
+
+      {searchParams.google_connected && (
+        <div className="mt-4 rounded-md border border-green-300 bg-green-50 p-3 text-sm text-green-800">
+          已成功連接 Google：{searchParams.google_connected}
+        </div>
+      )}
+      {searchParams.google_error && (
+        <div className="mt-4 rounded-md border border-red-300 bg-red-50 p-3 text-sm text-red-700">
+          Google 連接失敗：{searchParams.google_error}
+        </div>
+      )}
+      {!gEnabled && (
+        <div className="mt-4 rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-800">
+          Google 整合尚未啟用。設定 <code>GOOGLE_CLIENT_ID</code>、
+          <code>GOOGLE_CLIENT_SECRET</code>、<code>GOOGLE_OAUTH_REDIRECT_URI</code>
+          與 <code>GOOGLE_TOKEN_ENC_KEY</code> 後即可連接面試官行事曆（M2）。
+        </div>
+      )}
 
       {interviewers.length === 0 ? (
         <p className="mt-8 text-sm text-gray-500">
@@ -43,6 +68,14 @@ export default async function InterviewersPage() {
               <div className="flex items-baseline justify-between">
                 <h2 className="text-lg font-semibold text-gray-900">{iv.name}</h2>
                 <span className="text-sm text-gray-500">{iv.email}</span>
+              </div>
+
+              <div className="mt-2">
+                <GoogleConnect
+                  interviewerId={iv.id}
+                  connected={Boolean(iv.googleAccountId)}
+                  enabled={gEnabled}
+                />
               </div>
 
               <p className="mt-2 text-xs text-gray-400">
