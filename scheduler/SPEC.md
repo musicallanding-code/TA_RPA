@@ -105,7 +105,7 @@ AuditLog           actor, action, entity, before, after, ts
 
 > 表單必填欄位：中文姓名、Email（與 104 一致）、手機。送出後導向確認頁並寄確認信。
 
-## 3.10 內控與資安要求（Pre-IPO，必做）
+## 3.10 內控與資安要求（企業治理，必做）
 
 - 管理後台限定公司 Google 網域登入。
 - OAuth refresh token 加密儲存。
