@@ -2,11 +2,34 @@
 
 招募自動化第一階段的核心子專案。完整規格見 [`SPEC.md`](./SPEC.md)。
 
-**目前進度：M1（專案骨架 + 資料模型 + 管理後台建立 Event Type + 公開頁渲染靜態 slot；尚未串接 Google）。**
+**目前進度：M2（M1 + Google OAuth + 行事曆 free/busy 整合）。** 未設定 Google 憑證時自動退回 M1 行為。
 
 ## 技術棧
 
-Next.js 14 (App Router) · TypeScript · Tailwind CSS · Prisma ORM · SQLite（MVP，可換 PostgreSQL）· Luxon · Zod · Vitest。
+Next.js 14 (App Router) · TypeScript · Tailwind CSS · Prisma ORM · SQLite（MVP，可換 PostgreSQL）· Luxon · Zod · Vitest · google-auth-library。
+
+## M2 範圍（Google 整合）
+
+- ✅ **Google OAuth**：管理後台可為每位面試官「連接 Google 帳號」（`/admin/interviewers`）。授權流程：`/api/auth/google/start` → Google 同意頁 → `/api/auth/google/callback`。
+- ✅ **free/busy**：產生可預約時段時，讀取已連接面試官的 Google 行事曆忙碌區間，將重疊的 slot（含 buffer）移除（SPEC §3.6 步驟 4–5）。
+- ✅ **Token 安全**：refresh token 以 AES-256-GCM 加密儲存（SPEC §3.10）；access token 自動以 refresh token 更新。
+- ✅ **優雅降級**：未設定 Google 憑證 / 面試官未連接時，行為與 M1 完全相同（只用每週可面試時段）。
+- ✅ **稽核**：連接 / 中斷 Google 寫入 AuditLog。
+
+### 啟用 Google 整合（在本機）
+
+1. 在 `.env` 設定以下變數（缺任一即停用、退回 M1）：
+   ```
+   GOOGLE_CLIENT_ID="...apps.googleusercontent.com"
+   GOOGLE_CLIENT_SECRET="..."
+   GOOGLE_OAUTH_REDIRECT_URI="http://localhost:3000/api/auth/google/callback"
+   GOOGLE_TOKEN_ENC_KEY="<openssl rand -base64 32 產生的 32 byte 金鑰>"
+   ```
+2. 在 Google Cloud Console 建立 OAuth 2.0「網頁應用程式」用戶端，授權的重新導向 URI 填上面的 `GOOGLE_OAUTH_REDIRECT_URI`。
+3. `npm run dev` → 進 `/admin/interviewers` → 對面試官按「連接 Google 帳號」→ 用該面試官的 Google 帳號授權。
+4. 之後該面試官行事曆的忙碌時段會自動從可預約 slot 移除。
+
+> 預設要求的 scope：`calendar.freebusy`（讀忙碌）、`calendar.events`（M3 建立事件先一起授權，免二次同意）、`userinfo.email`（辨識連接者）。可用 `GOOGLE_SCOPES` 覆寫。
 
 ## M1 範圍
 

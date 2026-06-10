@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { DateTime } from "luxon";
 import { COMPANY_TZ } from "@/lib/time";
 import { generateSlots } from "@/lib/availability";
 import { loadEventTypeForSlots } from "@/lib/eventTypeLoader";
@@ -23,7 +24,14 @@ export async function GET(
     );
   }
 
-  const loaded = await loadEventTypeForSlots(params.slug);
+  // Window covering the requested calendar day (in company tz) for free/busy.
+  const dayStart = DateTime.fromISO(date, { zone: COMPANY_TZ }).startOf("day");
+  const range = {
+    startUtc: dayStart.toUTC().toJSDate(),
+    endUtc: dayStart.plus({ days: 1 }).toUTC().toJSDate(),
+  };
+
+  const loaded = await loadEventTypeForSlots(params.slug, range);
   if (!loaded) {
     return NextResponse.json({ error: "not found" }, { status: 404 });
   }

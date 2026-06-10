@@ -22,18 +22,24 @@ export async function GET(
     );
   }
 
-  const loaded = await loadEventTypeForSlots(params.slug);
-  if (!loaded) {
-    return NextResponse.json({ error: "not found" }, { status: 404 });
-  }
-
   const start = DateTime.fromISO(`${month}-01`, { zone: COMPANY_TZ });
   if (!start.isValid) {
     return NextResponse.json({ error: "invalid month" }, { status: 400 });
   }
+  const daysInMonth = start.daysInMonth ?? 31;
+
+  // One free/busy window for the whole month (per interviewer), reused per day.
+  const range = {
+    startUtc: start.startOf("day").toUTC().toJSDate(),
+    endUtc: start.plus({ days: daysInMonth }).startOf("day").toUTC().toJSDate(),
+  };
+
+  const loaded = await loadEventTypeForSlots(params.slug, range);
+  if (!loaded) {
+    return NextResponse.json({ error: "not found" }, { status: 404 });
+  }
 
   const days: string[] = [];
-  const daysInMonth = start.daysInMonth ?? 31;
   for (let d = 0; d < daysInMonth; d++) {
     const date = start.plus({ days: d }).toISODate()!;
     const slots = generateSlots({
